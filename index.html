@@ -1,76 +1,463 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Auto Windrawwin Match Search</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }
-        label, input, button {
-            font-size: 1.2em;
-        }
-        #result {
-            margin-top: 20px;
-        }
-        input[type="text"] {
-            width: 300px;
-            padding: 6px;
-        }
-        button {
-            padding: 8px 16px;
-        }
-        a {
-            color: #1565c0;
-            text-decoration: none;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Withdrawal Receipt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --primary-blue: #0057b8;
+      --highlight-green: #049a5b;
+      --highlight-yellow: #e19917;
+      --highlight-red: #c91313;
+      --card-bg: #fff;
+      --body-bg: #e7ecf3;
+    }
+    body {
+      background: var(--body-bg);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    /* Blinking loading text */
+    .blinking {
+      animation: blink 1s steps(2, start) infinite;
+    }
+    @keyframes blink {
+      to {
+        visibility: hidden;
+      }
+    }
+    /* Three pulsing dots loading animation */
+    .pulse-loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      margin-top: 18px;
+    }
+    .pulse-loader .dot {
+      width: 12px;
+      height: 12px;
+      margin: 0 8px;
+      border-radius: 50%;
+      background: var(--primary-blue);
+      opacity: 0.6;
+      animation: pulse 1.1s infinite linear;
+    }
+    .pulse-loader .dot:nth-child(2) {
+      animation-delay: 0.33s;
+    }
+    .pulse-loader .dot:nth-child(3) {
+      animation-delay: 0.66s;
+    }
+    @keyframes pulse {
+      0%, 100% {transform: scale(1); opacity: 0.6;}
+      50% {transform: scale(1.5); opacity: 1;}
+    }
+    .loading-box {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 32px 40px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 80px;
+    }
+    .loading-text {
+      color: var(--primary-blue);
+      font-size: 1.18em;
+      font-weight: 500;
+      margin-bottom: 2px;
+      letter-spacing: 0.04em;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .pin-modal {
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      animation: fadein 0.4s;
+    }
+    @keyframes fadein {
+      from { opacity: 0;}
+      to { opacity: 1; }
+    }
+    .pin-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 30px 26px 21px 26px;
+      min-width: 320px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+      text-align: center;
+      position: relative;
+    }
+    .pin-title {
+      font-size: 1.15em;
+      color: #18181b;
+      margin-bottom: 19px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .pin-input {
+      width: 100%;
+      font-size: 2em;
+      text-align: center;
+      letter-spacing: 0.38em;
+      padding: 10px 0;
+      border: 1.5px solid #b1b9c1;
+      border-radius: 7px;
+      outline: none;
+      margin-bottom: 18px;
+    }
+    .pin-input[disabled] {
+      background: #f2f4f6;
+      color: #bcbcbc;
+    }
+    .pin-btn {
+      background: var(--primary-blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 48px;
+      font-size: 1.07em;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.22s;
+    }
+    .pin-btn:active {
+      background: #004095;
+    }
+    .pin-btn[disabled] {
+      background: #bcbcbc;
+      cursor: not-allowed;
+    }
+    .pin-error {
+      color: var(--highlight-red);
+      font-size: 0.99em;
+      margin-bottom: 6px;
+      height: 18px;
+    }
+    .utc-warning {
+      color: #bc9105;
+      background: #fffbe7;
+      border: 1px solid #f5e1a9;
+      padding: 12px;
+      border-radius: 7px;
+      margin-bottom: 15px;
+      font-size: 1.03em;
+      letter-spacing: 0.04em;
+    }
+    /* --- Receipt Styles --- */
+    .receipt-card {
+      background: var(--card-bg);
+      max-width: 420px;
+      margin: 0 auto;
+      box-shadow: 0 6px 34px rgba(0,0,0,0.11);
+      border-radius: 18px;
+      padding: 32px 32px 30px 32px;
+      position: relative;
+      animation: fadein 0.7s;
+      margin-top: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .bank-logo {
+      display: block;
+      margin: 0 auto 16px;
+      width: 56px;
+      height: 56px;
+      background: url('https://quickteller.com/static/images/bank-icon.svg') no-repeat center center;
+      background-size: contain;
+      opacity: 0.85;
+    }
+    .receipt-title {
+      color: #183c6b;
+      letter-spacing: 0.03em;
+      text-align: center;
+      font-size: 1.48em;
+      font-weight: 700;
+      margin-bottom: 11px;
+    }
+    .section-label {
+      color: #a3abb9;
+      font-size: 0.93em;
+      font-weight: 500;
+      margin-top: 17px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .info-row {
+      margin-top: 9px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.08em;
+      color: #222b37;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      padding: 6px 0;
+      border-bottom: 1px solid #f2f4f6;
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    /* Status Card style */
+    .withdraw-status-card {
+      margin-top: 21px;
+      margin-bottom: 10px;
+      width: 97%;
+      border-radius: 15px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      background: #e6fff4;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 20px 23px;
+      border-left: 6px solid var(--highlight-green);
+    }
+    .withdraw-status-card.Pending {
+      background: #fff8e0;
+      border-left: 6px solid var(--highlight-yellow);
+    }
+    .withdraw-status-card.Failed {
+      background: #ffeaea;
+      border-left: 6px solid var(--highlight-red);
+    }
+    .withdraw-status-label {
+      font-size: 1.13em;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-bottom: 4px;
+    }
+    .withdraw-status-amount {
+      font-size: 1.23em;
+      font-weight: 700;
+      margin: 8px 0 6px 0;
+      letter-spacing: 0.02em;
+    }
+    .withdraw-status-value.Successful { color: var(--highlight-green);}
+    .withdraw-status-value.Pending { color: var(--highlight-yellow);}
+    .withdraw-status-value.Failed { color: var(--highlight-red);}
+    .footer {
+      text-align: center;
+      font-size: 0.97em;
+      margin-top: 22px;
+      color: #7a7a7a;
+      letter-spacing: 0.017em;
+    }
+    .reason-text {
+      color: var(--highlight-red);
+      font-size: 1em;
+      margin-bottom: 8px;
+      text-align: left;
+      margin-top: 3px;
+      font-weight: 500;
+    }
+    @media (max-width: 480px) {
+      .receipt-card { padding: 17px 6px 12px 6px; }
+      .bank-logo { width: 37px; height: 37px;}
+      .info-row, .withdraw-status-label, .withdraw-status-amount { font-size: 0.97em;}
+      .withdraw-status-card { padding:14px 9px;}
+    }
+  </style>
 </head>
 <body>
-    <h1>Auto Search for Windrawwin Match Reviews</h1>
-    <label for="teams">Enter Fixture (e.g., Arsenal vs Chelsea):</label><br>
-    <input type="text" id="teams" placeholder="Home Team vs Away Team">
-    <button onclick="searchMatch()">Search</button>
-    <div id="result"></div>
+  <div class="container" id="mainContainer">
+    <!-- Loading surface (shown first) -->
+    <div id="loadingSurface" class="loading-box">
+      <div class="pulse-loader">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="loading-text blinking">Loading Last Withdrawal Status</div>
+    </div>
+    <!-- PIN modal (hidden by default) -->
+    <div id="pinModal" class="pin-modal" style="display:none;">
+      <div class="pin-card">
+        <div id="utcWarning" class="utc-warning" style="display:none;">
+          Receipt access allowed only after <strong>18:00 UTC</strong>.<br>
+          <span id="currentUtc"></span>
+        </div>
+        <div class="pin-title">
+          Please enter your PIN to view your withdrawal receipt
+        </div>
+        <form id="pinForm" autocomplete="off">
+          <input type="password" maxlength="4" inputmode="numeric" class="pin-input" pattern="\d{4}" placeholder="• • • •" id="pinInput" required>
+          <div class="pin-error" id="pinError"></div>
+          <button class="pin-btn" id="pinBtn" type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+    <!-- Receipt surface -->
+    <div id="receiptSurface" style="display:none;">
+      <!-- Receipt will be added here by JS -->
+    </div>
+  </div>
+  <script>
+    /* --- Data Configuration --- */
+    const userPINs = {
+      "Sak88854": "4321",
+      "JaneDoe": "1234",
+      "MikeX": "8422",
+      "AdaOla": "7654"
+      // Add more users as needed
+    };
+    const userWithdrawals = {
+      "Sak88854": {
+        name: "Sak88854",
+        account: "1234567890",
+        transactionId: "WTX202511041046ZZZ",
+        date: "2025-11-04",
+        time: "10:46:13 UTC",
+        method: "Mobile Withdraw",
+        location: "Empire Plaza Branch"
+      },
+      "JaneDoe": {
+        name: "JaneDoe",
+        account: "4561122334",
+        transactionId: "WTX202511041117JAN",
+        date: "2025-11-04",
+        time: "11:17:22 UTC",
+        method: "Mobile Withdraw",
+        location: "Yaba Branch"
+      },
+      "MikeX": {
+        name: "MikeX",
+        account: "8907765432",
+        transactionId: "WTX202511041130MIK",
+        date: "2025-11-04",
+        time: "11:30:00 UTC",
+        method: "Mobile Withdraw",
+        location: "Lekki Branch"
+      },
+      "AdaOla": {
+        name: "AdaOla",
+        account: "3322446655",
+        transactionId: "WTX202511041217ADA",
+        date: "2025-11-04",
+        time: "12:17:11 UTC",
+        method: "Mobile Withdraw",
+        location: "VI Branch"
+      }
+    };
+    const userStatus = {
+      "Sak88854": { status: "Successful", amount: "₦280,000.00" },
+      "JaneDoe": { status: "Pending", amount: "₦35,500.00" },
+      "MikeX": { status: "Failed", amount: "₦7,800.00" },
+      "AdaOla": { status: "Successful", amount: "₦12,350.00" }
+    };
+    /* --- Time restriction configuration --- */
+    const OPEN_HOUR_UTC = 18, OPEN_MIN_UTC = 0;
+    let timeCheckInterval = null;
+    setTimeout(() => {
+      document.getElementById('loadingSurface').style.display = 'none';
+      document.getElementById('pinModal').style.display = 'flex';
+      checkUtcTimeAndSetUI();
+      timeCheckInterval = setInterval(checkUtcTimeAndSetUI, 30 * 1000); // auto-update every 30 sec
+    }, 6000);
 
-    <script>
-        function slugify(text) {
-            // Lowercase, remove diacritics, trim, replace non-word with hyphens, remove extra hyphens
-            return text
-                .toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^a-z0-9]+/g, "-")
-                .replace(/^-+|-+$/g, "");
-        }
+    function getCurrentUtcHMS() {
+      const now = new Date();
+      return {
+        h: now.getUTCHours(),
+        m: now.getUTCMinutes(),
+        s: now.getUTCSeconds(),
+        str: now.toISOString().slice(11,19)
+      };
+    }
+    function checkUtcTimeAndSetUI() {
+      const utc = getCurrentUtcHMS();
+      const pinInput = document.getElementById('pinInput');
+      const pinBtn = document.getElementById('pinBtn');
+      const utcWarning = document.getElementById('utcWarning');
+      const currentUtc = document.getElementById('currentUtc');
+      let canAccess = (utc.h > OPEN_HOUR_UTC) || (utc.h === OPEN_HOUR_UTC && utc.m >= OPEN_MIN_UTC);
+      currentUtc.textContent = "Current UTC time: " + utc.str;
+      if (!canAccess) {
+        utcWarning.style.display = '';
+        pinInput.disabled = true;
+        pinInput.value = '';
+        pinBtn.disabled = true;
+      } else {
+        utcWarning.style.display = 'none';
+        pinInput.disabled = false;
+        pinBtn.disabled = false;
+        clearInterval(timeCheckInterval); // no need to keep checking
+      }
+    }
+    document.getElementById('pinForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const utc = getCurrentUtcHMS();
+      let canAccess = (utc.h > OPEN_HOUR_UTC) || (utc.h === OPEN_HOUR_UTC && utc.m >= OPEN_MIN_UTC);
+      if (!canAccess) return;
+      const pin = document.getElementById('pinInput').value;
+      const pinError = document.getElementById('pinError');
+      let foundUser = Object.keys(userPINs).find(username => userPINs[username] === pin);
+      if (foundUser) {
+        document.getElementById('pinModal').style.display = 'none';
+        showReceipt(foundUser);
+      } else {
+        pinError.textContent = "Incorrect PIN. Try again.";
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinInput').focus();
+      }
+    });
 
-        function searchMatch() {
-            const input = document.getElementById('teams').value.trim();
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = '';
+    function showReceipt(username) {
+      const info = userWithdrawals[username];
+      const statusObj = userStatus[username] || { status: "Pending", amount: "N/A" };
+      const status = statusObj.status;
+      const amount = statusObj.amount;
+      let reasonText = "";
+      if (status === "Failed") reasonText = '<div class="reason-text">Reason: Insufficient funds</div>';
+      if (status === "Pending") reasonText = '<div class="reason-text">Status: Awaiting bank processing</div>';
+      const statusClass = status;
 
-            if (!input.includes('vs')) {
-                resultDiv.innerHTML = '<span style="color:red;">Please enter fixture as "Home Team vs Away Team".</span>';
-                return;
-            }
-
-            const [home, away] = input.split('vs').map(str => str.trim());
-            if (!home || !away) {
-                resultDiv.innerHTML = '<span style="color:red;">Both team names are required.</span>';
-                return;
-            }
-
-            // Windrawwin's URL format: https://www.windrawwin.com/results/{home-team}-vs-{away-team}/
-            const homeSlug = slugify(home);
-            const awaySlug = slugify(away);
-            const url = `https://www.windrawwin.com/results/${homeSlug}-vs-${awaySlug}/`;
-
-            resultDiv.innerHTML = `
-                <strong>Match Review Link:</strong><br>
-                <a href="${url}" target="_blank">${url}</a>
-            `;
-        }
-    </script>
+      const receiptHTML = `
+        <div class="receipt-card">
+          <div class="bank-logo"></div>
+          <div class="receipt-title">EmpireStateBank</div>
+          <div class="section-label">Transaction ID</div>
+          <div class="info-row"><span>${info.transactionId}</span></div>
+          <div class="section-label">Location</div>
+          <div class="info-row"><span>${info.location}</span></div>
+          <div class="section-label">Registered Date and Time</div>
+          <div class="info-row"><span>${info.date} &nbsp; ${info.time}</span></div>
+          <div class="section-label">Account No</div>
+          <div class="info-row"><span>${info.account}</span></div>
+          <div class="section-label">Name</div>
+          <div class="info-row"><span>${info.name}</span></div>
+          <div class="section-label">Method</div>
+          <div class="info-row"><span>${info.method}</span></div>
+          <div class="withdraw-status-card ${statusClass}">
+            <div class="withdraw-status-label">Withdraw Status</div>
+            <div class="withdraw-status-value ${statusClass}">${status}</div>
+            <span class="withdraw-status-amount">${amount}</span>
+            ${reasonText}
+          </div>
+          <div class="footer">Thank you for choosing EmpireStateBank.</div>
+        </div>
+      `;
+      const receiptSurface = document.getElementById('receiptSurface');
+      receiptSurface.innerHTML = receiptHTML;
+      receiptSurface.style.display = 'block';
+    }
+  </script>
 </body>
 </html>
