@@ -1,517 +1,330 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Withdrawal Receipt</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Withdrawal Status</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root {
-      --primary-blue: #0057b8;
-      --highlight-green: #049a5b;
-      --highlight-yellow: #e19917;
-      --highlight-red: #c91313;
-      --card-bg: #fff;
-      --body-bg: #e7ecf3;
-    }
     body {
-      background: var(--body-bg);
       font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f8fb;
       margin: 0;
-      padding: 0;
       min-height: 100vh;
     }
     .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      max-width: 400px;
+      background: white;
+      margin: 56px auto 0 auto;
+      border-radius: 10px;
+      box-shadow: 0 3px 16px rgba(0,0,0,0.11);
+      padding: 32px;
     }
-    /* Blinking loading text */
-    .blinking {
-      animation: blink 1s steps(2, start) infinite;
-    }
-    @keyframes blink {
-      to {
-        visibility: hidden;
-      }
-    }
-    /* Three pulsing dots loading animation */
-    .pulse-loader {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 22px;
-      margin-top: 18px;
-    }
-    .pulse-loader .dot {
-      width: 12px;
-      height: 12px;
-      margin: 0 8px;
-      border-radius: 50%;
-      background: var(--primary-blue);
-      opacity: 0.6;
-      animation: pulse 1.1s infinite linear;
-    }
-    .pulse-loader .dot:nth-child(2) {
-      animation-delay: 0.33s;
-    }
-    .pulse-loader .dot:nth-child(3) {
-      animation-delay: 0.66s;
-    }
-    @keyframes pulse {
-      0%, 100% {transform: scale(1); opacity: 0.6;}
-      50% {transform: scale(1.5); opacity: 1;}
-    }
-    .loading-box {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 32px 40px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.09);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 80px;
-    }
-    .loading-text {
-      color: var(--primary-blue);
-      font-size: 1.18em;
-      font-weight: 500;
-      margin-bottom: 2px;
-      letter-spacing: 0.04em;
+    h2 {
       text-align: center;
-      margin-top: 10px;
+      margin-top: 0;
+      color: #233;
     }
-    .pin-modal {
-      position: fixed;
-      top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.10);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-      animation: fadein 0.4s;
-    }
-    @keyframes fadein {
-      from { opacity: 0;}
-      to { opacity: 1; }
-    }
-    .pin-card {
-      background: var(--card-bg);
-      border-radius: 18px;
-      padding: 30px 26px 21px 26px;
-      min-width: 320px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.13);
-      text-align: center;
-      position: relative;
-    }
-    .pin-title {
-      font-size: 1.15em;
-      color: #18181b;
-      margin-bottom: 19px;
-      font-weight: 500;
-      letter-spacing: 0.03em;
-    }
-    .pin-input {
+    input[type="password"] {
       width: 100%;
-      font-size: 2em;
-      text-align: center;
-      letter-spacing: 0.38em;
-      padding: 10px 0;
-      border: 1.5px solid #b1b9c1;
-      border-radius: 7px;
-      outline: none;
-      margin-bottom: 18px;
-    }
-    .pin-input[disabled] {
-      background: #f2f4f6;
-      color: #bcbcbc;
-    }
-    .pin-btn {
-      background: var(--primary-blue);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 48px;
-      font-size: 1.07em;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background 0.22s;
-    }
-    .pin-btn:active {
-      background: #004095;
-    }
-    .pin-btn[disabled] {
-      background: #bcbcbc;
-      cursor: not-allowed;
-    }
-    .pin-error {
-      color: var(--highlight-red);
-      font-size: 0.99em;
-      margin-bottom: 6px;
-      height: 18px;
-    }
-    .utc-warning {
-      color: #bc9105;
-      background: #fffbe7;
-      border: 1px solid #f5e1a9;
+      font-size: 1.7em;
+      letter-spacing: 1em;
       padding: 12px;
-      border-radius: 7px;
-      margin-bottom: 15px;
-      font-size: 1.03em;
-      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+      border: 1px solid #b5bac8;
+      border-radius: 6px;
+      text-align: center;
+      background: #f8fafc;
     }
-    /* --- Receipt Styles --- */
-    .receipt-card {
-      background: var(--card-bg);
-      max-width: 420px;
-      margin: 0 auto;
-      box-shadow: 0 6px 34px rgba(0,0,0,0.11);
-      border-radius: 18px;
-      padding: 32px 32px 30px 32px;
-      position: relative;
-      animation: fadein 0.7s;
-      margin-top: 50px;
+    button {
+      width: 100%;
+      background: #3885f7;
+      color: white;
+      border: 0;
+      border-radius: 6px;
+      padding: 13px 0;
+      font-size: 1.15em;
+      cursor: pointer;
+      margin-top: 6px;
+      margin-bottom: 8px;
+      font-weight: 500;
+      transition: background .18s;
+    }
+    button:hover {
+      background: #2769bd;
+    }
+    .error {
+      color: #d01c2a;
+      text-align: center;
+      margin-bottom: 10px;
+      min-height: 18px;
+    }
+    .loading {
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin: 28vh 0 0 0;
     }
-    .bank-logo {
-      display: block;
-      margin: 0 auto 16px;
-      width: 56px;
-      height: 56px;
-      background: url('https://quickteller.com/static/images/bank-icon.svg') no-repeat center center;
-      background-size: contain;
-      opacity: 0.85;
+    .spinner {
+      border: 6px solid #e3e5ed;
+      border-top: 6px solid #3885f7;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      margin-bottom: 18px;
+      animation: spin 0.85s linear infinite;
     }
-    .receipt-title {
-      color: #183c6b;
-      letter-spacing: 0.03em;
-      text-align: center;
-      font-size: 1.48em;
-      font-weight: 700;
-      margin-bottom: 11px;
+    @keyframes spin {
+      0% {transform: rotate(0deg);}
+      100% {transform: rotate(360deg);}
     }
-    .section-label {
-      color: #a3abb9;
-      font-size: 0.93em;
-      font-weight: 500;
-      margin-top: 17px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    .info-row {
-      margin-top: 9px;
+    table {
       width: 100%;
-      display: flex;
-      justify-content: space-between;
-      font-size: 1.08em;
-      color: #222b37;
-      font-weight: 500;
-      letter-spacing: 0.01em;
-      padding: 6px 0;
-      border-bottom: 1px solid #f2f4f6;
+      border-collapse: collapse;
+      margin-top: 18px;
+      margin-bottom: 15px;
     }
-    .info-row:last-child {
+    th, td {
+      border-bottom: 1px solid #e7e9ee;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #f5f7fa;
+      color: #333;
+    }
+    tr:last-child td {
       border-bottom: none;
     }
-    /* Status Card style */
-    .withdraw-status-card {
-      margin-top: 21px;
-      margin-bottom: 10px;
-      width: 97%;
-      border-radius: 15px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      background: #e6fff4;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 20px 23px;
-      border-left: 6px solid var(--highlight-green);
-    }
-    .withdraw-status-card.Pending {
-      background: #fff8e0;
-      border-left: 6px solid var(--highlight-yellow);
-    }
-    .withdraw-status-card.Failed {
-      background: #ffeaea;
-      border-left: 6px solid var(--highlight-red);
-    }
-    .withdraw-status-label {
-      font-size: 1.13em;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      margin-bottom: 4px;
-    }
-    .withdraw-status-amount {
-      font-size: 1.23em;
-      font-weight: 700;
-      margin: 8px 0 6px 0;
-      letter-spacing: 0.02em;
-    }
-    .withdraw-status-value.Successful { color: var(--highlight-green);}
-    .withdraw-status-value.Pending { color: var(--highlight-yellow);}
-    .withdraw-status-value.Failed { color: var(--highlight-red);}
-    .footer {
-      text-align: center;
-      font-size: 0.97em;
-      margin-top: 22px;
-      color: #7a7a7a;
-      letter-spacing: 0.017em;
-    }
-    .reason-text {
-      color: var(--highlight-red);
-      font-size: 1em;
-      margin-bottom: 8px;
-      text-align: left;
-      margin-top: 3px;
+    .status {
       font-weight: 500;
     }
-    @media (max-width: 480px) {
-      .receipt-card { padding: 17px 6px 12px 6px; }
-      .bank-logo { width: 37px; height: 37px;}
-      .info-row, .withdraw-status-label, .withdraw-status-amount { font-size: 0.97em;}
-      .withdraw-status-card { padding:14px 9px;}
+    .ok { color: #249a41;}
+    .pending { color: #f9a603;}
+    .fail, .refund { color: #d01c2a; }
+    .logout-btn {
+      background: #ccd4e5;
+      color: #223;
+      font-size: 0.99em;
+      margin-top: 15px;
+      transition: background .18s, color .14s;
+    }
+    .logout-btn:hover { background: #b2bed8; color: #090e19;}
+    .info-message {
+      max-width: 400px;
+      margin: 10vw auto 0 auto;
+      background: #fff7e5;
+      color: #673f09;
+      border: 1px solid #f4e0b3;
+      border-radius: 9px;
+      text-align: center;
+      padding: 35px 18px 34px 18px;
+      font-size: 1.21em;
+      box-shadow: 0 2px 8px rgba(194,140,2,0.07);
+    }
+    @media (max-width: 600px) {
+      .container, .info-message {
+        margin: 32px 6px 0 6px;
+        padding: 16px;
+      }
+      table, th, td {
+        font-size: 15px;
+      }
+      h2 { font-size: 1.25em;}
     }
   </style>
 </head>
 <body>
-  <div class="container" id="mainContainer">
-    <!-- Loading surface (shown first) -->
-    <div id="loadingSurface" class="loading-box">
-      <div class="pulse-loader">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-      </div>
-      <div class="loading-text blinking">Loading Last Withdrawal Status</div>
-    </div>
-    <!-- PIN modal (hidden by default) -->
-    <div id="pinModal" class="pin-modal" style="display:none;">
-      <div class="pin-card">
-        <div id="utcWarning" class="utc-warning" style="display:none;">
-          Access allowed only after <strong>18:00 UTC</strong>.<br>
-          <span id="currentUtc"></span>
-        </div>
-        <div class="pin-title">
-          Please enter your PIN to view your withdrawal status
-        </div>
-        <form id="pinForm" autocomplete="off">
-          <input type="password" maxlength="4" inputmode="numeric" class="pin-input" pattern="\d{4}" placeholder="• • • •" id="pinInput" required>
-          <div class="pin-error" id="pinError"></div>
-          <button class="pin-btn" id="pinBtn" type="submit">Submit</button>
-        </form>
-      </div>
-    </div>
-    <!-- Receipt surface -->
-    <div id="receiptSurface" style="display:none;">
-      <!-- Receipt will be added here by JS -->
-    </div>
-  </div>
+  <div id="main"></div>
   <script>
-    /* --- Data Configuration --- */
-    const userPINs = {
-      "Emmanuel Ekpa": "3572",
-      "Esther Amos": "4073",
-      "Itohowo Akan": "1313",
-      "Samuel Akpan": "5012",
-      "Samuel Ime": "1266",
-      "Saviour Ekong": "1220",
-      "Charity Hanson": "2019",
-      "Ushie Onen": "1908",
-      "Patience Ekpa": "1108"
-      // Add more users as needed
-    };
-    const userWithdrawals = {
-      "Emmanuel Ekpa": {
-        name: "Emmanuel Ekpa",
-        account: "0144517890",
-        transactionId: "ESB902511041006EE",
-        date: "2025-12-01",
-        time: "10:46:13 UTC",
-        method: "Mobile Withdraw",
-        location: "North Clark Street, Chicago"
-      },
-      "Esther Amos": {
-        name: "Esther Amos",
-        account: "0166122330",
-        transactionId: "ESB002514441117EA",
-        date: "2024-06-25",
-        time: "11:17:22 UTC",
-        method: "Mobile Withdraw",
-        location: "North Clark Street, Chicago"
-      },
-      "Itohowo Akan": {
-        name: "Itohowo Akan",
-        account: "0102475431",
-        transactionId: "ESB602511080130IK",
-        date: "2024-06-01",
-        time: "11:30:00 UTC",
-        method: "Mobile Withdraw",
-        location: "North Clark Street, Chicago"
-      },
-      "Samuel Akpan": {
-        name: "Samuel Akpan",
-        account: "0112046660",
-        transactionId: "ESB302611041200SA",
-        date: "2024-06-10",
-        time: "12:17:11 UTC",
-        method: "Mobile Withdraw",
-        location: "North Clark Street, Chicago"
-      },
-      "Samuel Ime": {
-        name: "Samuel Ime",
-        account: "01039567899",
-        transactionId: "ESB222511091016SI",
-        date: "2024-07-01",
-        time: "10:46:13 UTC",
-        method: "Mobile Withdraw",
-        location: "North Clark Street, Chicago"
-      },
-      "Saviour Ekong": {
-        name: "Saviour Ekong",
-        account: "01610223334",
-        transactionId: "ESB002511141117SE",
-        date: "2024-07-05",
-        time: "11:17:22 UTC",
-        method: "Mobile Withdraw",
-        location: "North Clark Street, Chicago"
-      },
-      "Charity Hanson": {
-        name: "Charity Hanson",
-        account: "0107765432",
-        transactionId: "ESB201501041130CH",
-        date: "2024-07-10",
-        time: "11:30:00 UTC",
-        method: "Mobile Withdraw",
-        location: "North Clark Street, Chicago"
-      },
-      "Ushie Onen": {
-        name: "Ushie Onen",
-        account: "0122446005",
-        transactionId: "ESB202091041217UO",
-        date: "2024-07-18",
-        time: "12:17:11 UTC",
-        method: "Mobile Withdraw",
-        location: "North Clark Street, Chicago"
-      },
-      "Patience Ekpa": {
-        name: "Patience Ekpa",
-        account: "0112244600",
-        transactionId: "ESB201091041217PE",
-        date: "2025-11-07",
-        time: "12:17:11 UTC",
-        method: "Mobile Withdraw",
-        location: "North Clark Street, Chicago"
-      },
-    };
-    const userStatus = {
-      "Emmanuel Ekpa": { status: "Successful", amount: "₦3,000.00" },
-      "Esther Amos": { status: "Pending", amount: "₦7,000.00" },
-      "Itohowo Akan": { status: "Successful", amount: "₦7,000.00" },
-      "Samuel Akpan": { status: "Failed", amount: "₦12,350.00" },
-      "Samuel Ime": { status: "Pending", amount: "₦10,000.00" },
-      "Saviour Ekong": { status: "Pending", amount: "₦7,500.00" },
-      "Charity Hanson": { status: "Failed", amount: "₦9,000.00" },
-      "Ushie Onen": { status: "Failed", amount: "₦7,000.00" },
-      "Patience Ekpa": { status: "Pending", amount: "₦40,000.00" }
-    };
-    /* --- Time restriction configuration --- */
-    const OPEN_HOUR_UTC = 18, OPEN_MIN_UTC = 0;
-    let timeCheckInterval = null;
-    setTimeout(() => {
-      document.getElementById('loadingSurface').style.display = 'none';
-      document.getElementById('pinModal').style.display = 'flex';
-      checkUtcTimeAndSetUI();
-      timeCheckInterval = setInterval(checkUtcTimeAndSetUI, 30 * 1000); // auto-update every 30 sec
-    }, 6000);
-
-    function getCurrentUtcHMS() {
+    // First, check UTC time
+    function isAfter18UTC() {
       const now = new Date();
-      return {
-        h: now.getUTCHours(),
-        m: now.getUTCMinutes(),
-        s: now.getUTCSeconds(),
-        str: now.toISOString().slice(11,19)
-      };
+      const hour = now.getUTCHours();
+      return hour >= 18;
     }
-    function checkUtcTimeAndSetUI() {
-      const utc = getCurrentUtcHMS();
-      const pinInput = document.getElementById('pinInput');
-      const pinBtn = document.getElementById('pinBtn');
-      const utcWarning = document.getElementById('utcWarning');
-      const currentUtc = document.getElementById('currentUtc');
-      let canAccess = (utc.h > OPEN_HOUR_UTC) || (utc.h === OPEN_HOUR_UTC && utc.m >= OPEN_MIN_UTC);
-      currentUtc.textContent = "Current UTC time: " + utc.str;
-      if (!canAccess) {
-        utcWarning.style.display = '';
-        pinInput.disabled = true;
-        pinInput.value = '';
-        pinBtn.disabled = true;
-      } else {
-        utcWarning.style.display = 'none';
-        pinInput.disabled = false;
-        pinBtn.disabled = false;
-        clearInterval(timeCheckInterval); // no need to keep checking
-      }
-    }
-    document.getElementById('pinForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const utc = getCurrentUtcHMS();
-      let canAccess = (utc.h > OPEN_HOUR_UTC) || (utc.h === OPEN_HOUR_UTC && utc.m >= OPEN_MIN_UTC);
-      if (!canAccess) return;
-      const pin = document.getElementById('pinInput').value;
-      const pinError = document.getElementById('pinError');
-      let foundUser = Object.keys(userPINs).find(username => userPINs[username] === pin);
-      if (foundUser) {
-        document.getElementById('pinModal').style.display = 'none';
-        showReceipt(foundUser);
-      } else {
-        pinError.textContent = "Incorrect PIN. Try again.";
-        document.getElementById('pinInput').value = '';
-        document.getElementById('pinInput').focus();
-      }
-    });
 
-    function showReceipt(username) {
-      const info = userWithdrawals[username];
-      const statusObj = userStatus[username] || { status: "Pending", amount: "N/A" };
-      const status = statusObj.status;
-      const amount = statusObj.amount;
-      let reasonText = "";
-      if (status === "Failed") reasonText = '<div class="reason-text">Reason: Insufficient funds</div>';
-      if (status === "Pending") reasonText = '<div class="reason-text">Status: Awaiting bank processing</div>';
-      const statusClass = status;
-
-      const receiptHTML = `
-        <div class="receipt-card">
-          <div class="bank-logo"></div>
-          <div class="receipt-title">EmpireStateBank</div>
-          <div class="section-label">Transaction ID</div>
-          <div class="info-row"><span>${info.transactionId}</span></div>
-          <div class="section-label">Location</div>
-          <div class="info-row"><span>${info.location}</span></div>
-          <div class="section-label">Registered Date and Time</div>
-          <div class="info-row"><span>${info.date} &nbsp; ${info.time}</span></div>
-          <div class="section-label">Account No</div>
-          <div class="info-row"><span>${info.account}</span></div>
-          <div class="section-label">Name</div>
-          <div class="info-row"><span>${info.name}</span></div>
-          <div class="section-label">Method</div>
-          <div class="info-row"><span>${info.method}</span></div>
-          <div class="withdraw-status-card ${statusClass}">
-            <div class="withdraw-status-label">Withdraw Status</div>
-            <div class="withdraw-status-value ${statusClass}">${status}</div>
-            <span class="withdraw-status-amount">${amount}</span>
-            ${reasonText}
+    function showTimeMessage() {
+      document.getElementById('main').innerHTML = `
+        <div class="info-message">
+          Withdrawal status is only available<br>from <b>18:00 UTC</b> onward.<br>
+          <div style="margin-top:13px;font-size:.99em;">
+            Current UTC Time: <span id="utc-time"></span>
           </div>
-          <div class="footer">Thank you for choosing EmpireStateBank.</div>
         </div>
       `;
-      const receiptSurface = document.getElementById('receiptSurface');
-      receiptSurface.innerHTML = receiptHTML;
-      receiptSurface.style.display = 'block';
+      // live update UTC time
+      function updateTime() {
+        const now = new Date();
+        const pad = n => n.toString().padStart(2,'0');
+        document.getElementById('utc-time').textContent =
+          pad(now.getUTCHours())+':'+pad(now.getUTCMinutes())+':'+pad(now.getUTCSeconds());
+      }
+      updateTime();
+      setInterval(updateTime, 1000);
+    }
+
+    if (!isAfter18UTC()) {
+      showTimeMessage();
+    } else {
+      // ---- WITHDRAWAL LOGIC BELOW ----
+      // Withdrawal data, mapped by PIN
+      const withdrawalRecords = {
+        "3572": [
+          { date: "2025-11-01", amount: 5000, status: "Withdraw successful" },
+          { date: "2025-11-02", amount: 8000, status: "Fail" },
+          { date: "2025-11-02", amount: 8000, status: "Refund" },
+        ],
+        "4073": [
+          { date: "2025-09-04", amount: 7000, status: "Fail" },
+          { date: "2025-11-05", amount: 7000, status: "Refund" },
+        ],
+        "1313": [
+          { date: "2025-09-01", amount: 7000, status: "Withdraw successful" },
+        ],
+        "5012": [
+          { date: "2025-09-03", amount: 17000, status: "Fail" },
+          { date: "2025-11-03", amount: 17000, status: "Refund" },
+        ],
+        "1266": [
+          { date: "2025-11-04", amount: 250, status: "Withdraw successful" },
+        ],
+        "1220": [
+          { date: "2025-11-06", amount: 300, status: "Fail" },
+        ],
+        "2019": [
+          { date: "2025-11-04", amount: 9000, status: "Fail" },
+          { date: "2025-11-05", amount: 9000, status: "Refund" },
+        ],
+        "1908": [
+          { date: "2025-09-12", amount: 7000, status: "Fail" },
+          { date: "2025-11-05", amount: 7000, status: "Refund" },
+        ],
+        "4173": [
+          { date: "2025-11-05", amount: 500, status: "Withdraw successful" },
+        ],
+      };
+
+      const pinStatusClass = status =>
+        status === "Withdraw successful" ? "ok"
+          : status === "Pending" ? "pending"
+          : status === "Fail" ? "fail"
+          : status === "Refund" ? "refund"
+          : "";
+
+      const main = document.getElementById('main');
+
+      // State
+      let state = "init-loading"; // init-loading, pin, loading, status
+      let errorMsg = "";
+      let currentPin = "";
+
+      // Render functions
+      function showLoading(text) {
+        main.innerHTML = `
+          <div class="loading">
+            <div class="spinner"></div>
+            <div>${text || "Loading..."}</div>
+          </div>
+        `;
+      }
+
+      function showPinInput() {
+        main.innerHTML = `
+          <div class="container">
+            <h2>Enter Your PIN</h2>
+            <div class="error">${errorMsg || "&nbsp;"}</div>
+            <form id="pin-form" autocomplete="off">
+              <input
+                type="password"
+                pattern="\\d{4}"
+                maxlength="4"
+                placeholder="4-digit PIN"
+                inputmode="numeric"
+                id="pin-input"
+                required
+              /><br>
+              <button type="submit">Submit</button>
+            </form>
+          </div>
+        `;
+
+        setTimeout(() => {
+          const pinInput = document.getElementById('pin-input');
+          if(pinInput) pinInput.focus();
+        }, 200);
+
+        document.getElementById('pin-form').onsubmit = function(e) {
+          e.preventDefault();
+          const enteredPin = document.getElementById('pin-input').value.trim();
+          if (withdrawalRecords.hasOwnProperty(enteredPin)) {
+            errorMsg = "";
+            currentPin = enteredPin;
+            state = "loading";
+            render();
+            setTimeout(() => {
+              state = "status";
+              render();
+            }, 6000);
+          } else {
+            errorMsg = "Invalid PIN. Please try again.";
+            render();
+          }
+        };
+      }
+
+      function showStatus() {
+        const records = withdrawalRecords[currentPin];
+        let rows = "";
+        if(records && records.length) {
+          rows = records.map(r =>
+            `<tr>
+              <td>${r.date}</td>
+              <td>₦${r.amount}</td>
+              <td class="status ${pinStatusClass(r.status)}">${r.status}</td>
+            </tr>`
+          ).join("");
+        }
+
+        main.innerHTML = `
+          <div class="container">
+            <h2>Withdrawal Status</h2>
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Amount</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+            <button class="logout-btn" id="logout-btn">Log out</button>
+          </div>
+        `;
+
+        document.getElementById('logout-btn').onclick = function() {
+          state = "pin";
+          errorMsg = "";
+          currentPin = "";
+          render();
+        }
+      }
+
+      function render() {
+        if (state === "init-loading") {
+          showLoading("Preparing Withdrawal Status...");
+          setTimeout(() => {
+            state = "pin";
+            render();
+          }, 1500);
+        }
+        else if (state === "pin") showPinInput();
+        else if (state === "loading") showLoading("Verifying PIN and fetching withdrawal records...");
+        else if (state === "status") showStatus();
+      }
+
+      // Init
+      render();
+      // ---- END WITHDRAWAL LOGIC ----
     }
   </script>
 </body>
